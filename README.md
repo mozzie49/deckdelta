@@ -2,21 +2,27 @@
 
 # △ DeckDelta
 
-**The deck changed. Find the difference.**
+**Compare PDF decks, even when slides move.**
 
-A local-first PDF deck reviewer that follows slides when they move.
+Compare PDF decks in your browser with a global slide map, separate move/edit flags, and honest uncertainty.
 
-**[Open the live demo](https://mozzie49.github.io/deckdelta/)** · [简体中文](#简体中文)
+**[Try the sample decks →](https://mozzie49.github.io/deckdelta/)** · [Watch the browser walkthrough](https://mozzie49.github.io/deckdelta/demo.html) · [简体中文](#简体中文)
+
+No account. No document upload. Open the app, then click **Try the sample decks**.
 
 </div>
 
-![DeckDelta reviewing a real sample price change from $39 to $49](https://mozzie49.github.io/deckdelta/deckdelta-preview.png)
+[![Real DeckDelta sample: slide 4 matched to slide 2, with separate Changed and Moved badges and both chart versions](https://mozzie49.github.io/deckdelta/deckdelta-preview.png)](https://mozzie49.github.io/deckdelta/demo.html)
+
+**Same slide, new position, changed chart: 4 → 2.** The walkthrough also shows **$39 → $49** and duplicate appendix pages flagged **Check match**. Recorded from the real app with the included fictional PDFs.
 
 ## Why another PDF diff?
 
-A page-by-page comparison gets noisy when slide 2 becomes slide 20. DeckDelta builds a **global, one-to-one slide map**, including equal-length decks, then separates a position change from a content change. Ambiguous matches stay visible and can be corrected by hand.
+Reordering a deck should not make every later page look like a rewrite. DeckDelta builds a **global, one-to-one slide map**, including equal-length decks, then checks each matched pair for text, numeric-token, and rendered changes. Ambiguous matches stay visible and can be corrected by hand.
 
-**Alpha release candidate:** [CI passed](https://github.com/mozzie49/deckdelta/actions/runs/36819320857) with 28 unit tests, strict typechecking, a production build, and 2 real-PDF Chromium end-to-end tests. Independent live-site QA exercised eight synthetic PDF pairs: seven supported cases produced the expected mappings and seeded-change flags; the wholly image-only deck was explicitly rejected. Cancellation, replacement during processing, review-state invalidation, and language switching were also checked. Export download and content checks passed in CI; reopening a downloaded report was not verified in live-site QA. This is a review aid, not a guarantee that every change is detected.
+In the sample, start with **Moved → 04 → 02** to inspect the edited chart. Then try **Changed → 03 → 03** for the price edit, and **Check match** for the identical appendix pages. No files to prepare.
+
+**Alpha review aid:** born-digital PDFs only, up to 50 pages and 25 MB per file. No OCR or guarantee that every change is detected. [Read the limits](#supported-scope-and-limits).
 
 ## What you get
 
@@ -33,7 +39,13 @@ A page-by-page comparison gets noisy when slide 2 becomes slide 20. DeckDelta bu
 
 Try the built-in fictional Aster Studio decks. The original 10-page pair contains a date change, a price change, a chart edit, four moved slides, one addition, one deletion, and two deliberately duplicated appendix pages. The sample source is included in `scripts/generate-samples.mjs`.
 
-## Run locally
+## Self-host without a build step
+
+[Download the ready-to-serve static ZIP](https://mozzie49.github.io/deckdelta/deckdelta-static.zip) · [SHA-256 checksum](https://mozzie49.github.io/deckdelta/deckdelta-static.zip.sha256)
+
+Extract it and serve the folder with any static HTTP server. If Python 3 is already installed, run `python3 -m http.server 8080 --bind 127.0.0.1` from that folder, then open `http://127.0.0.1:8080`. The ZIP includes the app, PDF.js assets, fictional samples, and browser walkthrough. No Node.js or npm is needed to use this prebuilt version. Opening `index.html` directly with `file://` is not supported.
+
+## Run from source
 
 Node.js 24 or newer:
 
@@ -102,12 +114,18 @@ npm test                         # pure matching, remapping, export-safety tests
 npm run build                    # strict typecheck and production bundle
 npx playwright install chromium  # first browser test setup
 npm run test:e2e                  # production-build browser smoke tests
+npm run demo:record               # real Chromium walkthrough; run after build
+python3 scripts/package-static.py # package verified build + recording
 npm run samples                  # regenerate the original fictional demo PDFs
 ```
 
+**Alpha release candidate:** [CI passed](https://github.com/mozzie49/deckdelta/actions/runs/36819320857) with 28 unit tests, strict typechecking, a production build, and 2 real-PDF Chromium end-to-end tests. Independent live-site QA exercised eight synthetic PDF pairs: seven supported cases produced the expected mappings and seeded-change flags; the wholly image-only deck was explicitly rejected. Cancellation, replacement during processing, review-state invalidation, and language switching were also checked. Export download and content checks passed in CI; reopening a downloaded report was not verified in live-site QA. This is a review aid, not a guarantee that every change is detected.
+
 GitHub CI runs the unit tests, production build, and real-PDF Chromium smoke suite. Browser coverage includes local-only requests, demo loading, numeric changes, overlay, preview dismissal, manual swaps, note context, review decisions, export escaping, Chinese UI, responsive overflow, cancellation, repeat uploads, and rejected inputs.
 
-The **Deploy Pages** workflow is manual and repeats these checks before publishing. In GitHub Settings → Pages, choose **GitHub Actions**, then run that workflow. No account credentials or third-party hosting services are required by the app.
+The browser walkthrough is a native Playwright WebM recording of the real app, without mocked results, sped-up playback, or added product UI. The recorder checks the displayed matches and flags, waits for slide images, and verifies the saved video is playable and 12–20 seconds long. It also writes same-origin captions and a provenance manifest. Generated files go into `dist/`; no video files or new runtime dependencies are added to the source tree.
+
+The **Deploy Pages** workflow is manual and repeats these checks, including the recording gate, before publishing. It also packages and integrity-checks a ready-to-serve static ZIP; the ZIP is created outside `dist/` before being copied in, so it cannot include itself. In GitHub Settings → Pages, choose **GitHub Actions**, then run that workflow. No account credentials or third-party hosting services are required by the app.
 
 Contributions that improve ambiguous matches, accessibility, language coverage, and reproducible adversarial fixtures are particularly useful. Please include a small, non-confidential failing PDF pair and the expected pairing when reporting a comparison issue.
 

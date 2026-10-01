@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "samples": "node scripts/generate-samples.mjs",
     "check": "npm test && npm run build",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "demo:record": "playwright test --config playwright.demo.config.ts"
   },
   "dependencies": {
     "pdfjs-dist": "^6.3.289"
