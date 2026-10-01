@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Watch DeckDelta follow a moved slide, reveal an edited chart and price, and flag duplicate pages for review. A real browser recording with fictional sample PDFs.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>DeckDelta · See a moved slide and its edits</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root { color-scheme: light; font: 16px/1.6 system-ui, sans-serif; color: #182238; background: #f6f7f3; }
+    * { box-sizing: border-box; }
+    body { max-width: 1080px; margin: auto; padding: 28px 24px 44px; }
+    nav { display: flex; justify-content: space-between; gap: 24px; align-items: center; }
+    a { color: #344f22; text-underline-offset: 3px; }
+    a:focus-visible { outline: 3px solid #5882dc; outline-offset: 4px; }
+    .brand { font-weight: 750; text-decoration: none; font-size: 21px; }
+    h1 { font-size: clamp(28px, 5vw, 43px); line-height: 1.15; letter-spacing: -1.3px; margin: 28px 0 12px; }
+    .intro { max-width: 760px; margin: 0 0 22px; color: #58644f; }
+    video { display: block; width: 100%; height: auto; border: 1px solid #dde3d8; border-radius: 10px; background: #111b31; }
+    .cta { display: inline-block; padding: 11px 18px; margin: 20px 0 0; border-radius: 6px; background: #cdf66c; color: #182238; font-weight: 700; text-decoration: none; }
+    .hint, footer { color: #58644f; font-size: 14px; }
+    h2 { font-size: 19px; margin-top: 28px; }
+    ol { padding-left: 24px; }
+    li { margin: 9px 0; }
+    footer { margin-top: 28px; padding-top: 18px; border-top: 1px solid #dde3d8; }
+  </style>
+</head>
+<body>
+  <nav aria-label="Navigation">
+    <a class="brand" href="./">△ DeckDelta</a>
+    <a href="https://github.com/mozzie49/deckdelta">Source on GitHub</a>
+  </nav>
+  <main>
+    <h1>Compare PDF decks, even when slides move.</h1>
+    <p class="intro">A real browser walkthrough: follow a slide from 4 to 2, inspect its edited chart, catch a price edit, and check an ambiguous match.</p>
+    <video controls playsinline preload="metadata" poster="deckdelta-preview.png" aria-label="DeckDelta walkthrough with fictional sample PDFs" aria-describedby="walkthrough-transcript">
+      <source src="deckdelta-demo.webm" type="video/webm">
+      <track kind="captions" src="deckdelta-demo.vtt" srclang="en" label="English" default>
+      Your browser cannot play this recording. <a href="deckdelta-demo.webm">Download the WebM</a> or read the walkthrough below.
+    </video>
+    <a class="cta" href="./">Try the sample decks →</a>
+    <p class="hint">Open the app, then click “Try the sample decks.” No account or document upload. Prefer to self-host? <a href="https://mozzie49.github.io/deckdelta/deckdelta-static.zip">Download the static build</a> and serve the extracted folder over HTTP.</p>
+    <section id="walkthrough-transcript" aria-labelledby="walkthrough-heading">
+      <h2>What to look for</h2>
+      <ol>
+        <li>Load the included fictional Aster Studio PDFs with one click.</li>
+        <li>Slide <strong>4 → 2</strong> has both <strong>Moved</strong> and <strong>Changed</strong> badges. The bars changed even though the extracted text did not.</li>
+        <li>Slide <strong>3 → 3</strong> shows the removed <strong>$39</strong> and added <strong>$49</strong> numeric tokens.</li>
+        <li>The two identical appendix pages are marked <strong>Check match</strong>. The warning explains the ambiguity.</li>
+        <li>Open <strong>Correct this match</strong> to see the manual pairing controls. The recording does not choose an arbitrary pairing for identical pages.</li>
+      </ol>
+    </section>
+  </main>
+  <footer>
+    <p>Unsped-up Chromium recording of the real app and original fictional PDFs. Captions describe the actions; product screens are unaltered. <a href="deckdelta-demo.json">Recording provenance</a>.</p>
+    <p>Alpha review aid. Born-digital PDFs only; up to 50 pages and 25 MB per file. No OCR or guarantee that every change is detected. <a href="https://github.com/mozzie49/deckdelta#supported-scope-and-limits">Scope and limits</a>.</p>
+  </footer>
+</body>
+</html>
