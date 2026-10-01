@@ -1,0 +1,21 @@
+import {describe,it,expect} from 'vitest';
+import {comparePair,type PageSnapshot} from '../src/compare';
+import {remapRows,escapeHtml,reconcileReviewState} from '../src/review';
+import {createReport} from '../src/export';
+const page=(n:number,text=`A unique complete page number ${n} for testing`):PageSnapshot=>({pageNumber:n,text,width:960,height:540,thumbnail:'data:image/png;base64,aGVsbG8=',pixels:new Uint8ClampedArray(4*128*72).fill(255),pixelWidth:128,pixelHeight:72});
+const deck=(pages:PageSnapshot[])=>({name:'test.pdf',pages,warnings:[]});
+describe('manual remapping',()=>{
+ it('swaps occupied targets without losing pages',()=>{const a=deck([page(1),page(2)]),b=deck([page(1),page(2)]);const rows=a.pages.map((p,i)=>comparePair(p,b.pages[i]));const result=remapRows(rows,a,b,1,2);expect(result.find(r=>r.before?.pageNumber===1)?.after?.pageNumber).toBe(2);expect(result.find(r=>r.before?.pageNumber===2)?.after?.pageNumber).toBe(1);expect(result).toHaveLength(2);expect(result.every(r=>r.manual)).toBe(true);});
+ it('unpairing creates a deletion plus an addition, repairing consumes it',()=>{const a=deck([page(1)]),b=deck([page(1)]);const rows=remapRows([comparePair(a.pages[0],b.pages[0])],a,b,1,0);expect(rows).toHaveLength(2);expect(rows.filter(r=>!r.after)).toHaveLength(1);expect(rows.filter(r=>!r.before)).toHaveLength(1);const repaired=remapRows(rows,a,b,1,1);expect(repaired).toHaveLength(1);expect(repaired[0].after?.pageNumber).toBe(1);});
+});
+describe('portable review safety',()=>{
+ it('escapes extracted text, filenames, and notes with no executable scripts',()=>{const text='<img src=x onerror=alert(1)> & "quoted"';const a=deck([page(1,text)]),b=deck([page(1,'Different content for a changed page')]);a.name='<script>alert(1)</script>.pdf';const html=createReport(a,b,[comparePair(a.pages[0],b.pages[0])],{'before-1':'</p><script>alert(1)</script>'},new Set(['before-1']),'en');expect(html).not.toContain('<script>');expect(html).toContain('&lt;script&gt;');expect(html).toContain("default-src 'none'");expect(html).toContain('✓ Reviewed');expect(html).toContain('data:image/png;base64,');});
+ it('never labels an uncertain match as no change detected in its status badges',()=>{const a=deck([page(1,'')]),b=deck([page(1,'')]);const html=createReport(a,b,[comparePair(a.pages[0],b.pages[0])],{},new Set(),'en');const badge=html.match(/<p class="badges">(.*?)<\/p>/)?.[1];expect(badge).toContain('Check match');expect(badge).not.toContain('No change detected');expect(html).toContain('visual similarity cannot verify');});
+ it('rejects non-image data URL sources and supports Chinese reports',()=>{const p=page(1);p.thumbnail='data:text/html;base64,PHNjcmlwdD4=';const d=deck([p]);const html=createReport(d,d,[comparePair(p,p)],{},new Set(),'zh');expect(html).not.toContain('data:text/html');expect(html).toContain('zh-CN');expect(html).toContain('审阅报告');});
+ it('HTML escaping is safe for attributes and Unicode',()=>{expect(escapeHtml('<"&\'你好>')).toBe('&lt;&quot;&amp;&#39;你好&gt;');});
+});
+
+describe('review-state reconciliation',()=>{
+ it('invalidates swapped decisions and labels both old-pair notes',()=>{const a=deck([page(1),page(2)]),b=deck([page(1),page(2)]);const previous=a.pages.map((p,i)=>comparePair(p,b.pages[i]));const next=remapRows(previous,a,b,1,2);const state=reconcileReviewState(previous,next,{'before-1':'First note','before-2':'Second note'},new Set(['before-1','before-2']),'en');expect(state.reviewed.size).toBe(0);expect(state.notes['before-1']).toContain('Before 1 → After 1');expect(state.notes['before-2']).toContain('Before 2 → After 2');});
+ it('retains a consumed added-page note in the new pair with provenance',()=>{const a=deck([page(1)]),b=deck([page(1),page(2)]);const previous=[comparePair(a.pages[0],b.pages[0]),comparePair(undefined,b.pages[1])];const next=remapRows(previous,a,b,1,2);const state=reconcileReviewState(previous,next,{'before-1':'Original note','after-2':'Added note'},new Set(['before-1','after-2']),'en');expect(state.notes['before-1']).toContain('Original note');expect(state.notes['before-1']).toContain('Added note');expect(state.notes['before-1']).toContain('Before — → After 2');expect(state.notes['after-2']).toBeUndefined();expect(state.reviewed.size).toBe(0);});
+});
