@@ -18,8 +18,17 @@ test('real PDF sample, review states, corrections, private portable export',asyn
  await expect(page.locator('.number-analysis')).toContainText('$39');await expect(page.locator('.number-analysis')).toContainText('$49');
  await expect(page.locator('.map-row.active')).toHaveAttribute('data-row','before-3');
  await expect(page.locator('.slide-map')).toBeVisible();
+ // Lead with the differentiator: a chart edit on a slide that moved from 4 to 2.
+ await page.locator('[data-row="before-4"]').click();
+ await expect(page.locator('.inspector-head h2')).toHaveText('Before 4 → After 2');
+ await expect(page.locator('.inspector-head .badge.changed')).toHaveText('Changed');
+ await expect(page.locator('.inspector-head .badge.moved')).toHaveText('Moved');
+ await expect(page.locator('.text-analysis')).toContainText('No extracted text changes detected.');
  await page.locator('.viewer img').evaluateAll(images=>Promise.all(images.map(image=>(image as HTMLImageElement).decode())));
+ // Keep the selected 04 → 02 card visible beside the chart, using ordinary scrolling.
+ await page.locator('.map-list').evaluate(map=>{const row=map.querySelector('.map-row.active')!;map.scrollTop+=row.getBoundingClientRect().top-map.getBoundingClientRect().top-12;});
  await page.evaluate(()=>window.scrollTo(0,0));
+ await expect(page.locator('.map-row.active .map-top')).toBeInViewport();
  // A real, verified product screenshot. Pages publishes dist after this test succeeds.
  await page.screenshot({path:'dist/deckdelta-preview.png',fullPage:false,animations:'disabled'});
  // Selecting a deep slide and rerendering the inspector must not jump the slide map.
@@ -58,6 +67,14 @@ test('real PDF sample, review states, corrections, private portable export',asyn
 
 test('cancel, replace, repeat, and reject invalid or oversized PDFs',async({page})=>{
  await page.goto('/');
+ await page.setViewportSize({width:390,height:844});
+ await expect(page.locator('.hero h1')).toContainText('Compare PDF decks,');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.locator('#language-button').click();
+ await expect(page.locator('.hero h1')).toContainText('页面换位也能追踪。');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.locator('#language-button').click();
+ await page.setViewportSize({width:1280,height:720});
  await page.locator('#demo-button').click();await page.locator('#cancel-button').click();await expect(page.locator('#compare-button')).toBeVisible();await expect(page.locator('#export-button')).toHaveCount(0);
  await page.locator('#before-file').setInputFiles({name:'invalid.pdf',mimeType:'application/pdf',buffer:Buffer.from('not a PDF')});await page.locator('#after-file').setInputFiles('public/samples/aster-after.pdf');await page.locator('#compare-button').click();await expect(page.locator('[role="alert"]')).toContainText('valid PDF');
  await page.locator('#before-file').setInputFiles('public/samples/aster-before.pdf');await page.locator('#compare-button').click();await expect(page.locator('#export-button')).toBeVisible({timeout:45_000});await page.locator('#reset-button').click();await expect(page.locator('#compare-button')).toBeDisabled();
