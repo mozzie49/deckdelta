@@ -17,6 +17,20 @@ jobs:
       - run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run demo:record
+      - run: python3 scripts/package-static.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-browser-demo
+          path: |
+            dist/deckdelta-preview.png
+            dist/deckdelta-demo.webm
+            dist/deckdelta-demo.vtt
+            dist/deckdelta-demo.json
+            dist/deckdelta-static.zip
+            dist/deckdelta-static.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
