@@ -1,0 +1,5 @@
+DeckDelta includes pdfjs-dist (PDF.js), Copyright Mozilla Foundation and contributors, licensed under Apache License 2.0. The full license is bundled at pdfjs/LICENSE. Font and WebAssembly assets include additional notices in their respective pdfjs/ directories.
+
+PDF.js official project: https://github.com/mozilla/pdf.js
+
+The fictional demo decks were generated for DeckDelta using pdf-lib (MIT), https://github.com/Hopding/pdf-lib. pdf-lib is a build/test dependency and is not loaded by the application at runtime.
