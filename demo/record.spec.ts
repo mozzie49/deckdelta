@@ -1,8 +1,29 @@
 import {test, expect} from '@playwright/test';
 import {writeFile} from 'node:fs/promises';
 
+function jpegFrameSize(data: Buffer): string {
+  if (data.readUInt16BE(0) !== 0xffd8) return 'invalid';
+  let offset = 2;
+  while (offset + 4 < data.length) {
+    if (data[offset++] !== 0xff) return 'invalid';
+    while (data[offset] === 0xff) offset++;
+    const marker = data[offset++];
+    if (marker === 0xda || marker === 0xd9) break;
+    if ((marker >= 0xd0 && marker <= 0xd7) || marker === 1) continue;
+    const length = data.readUInt16BE(offset);
+    if (length < 2 || offset + length > data.length) return 'invalid';
+    if ([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf].includes(marker)) {
+      if (length < 7) return 'invalid';
+      return `${data.readUInt16BE(offset + 5)}x${data.readUInt16BE(offset + 3)}`;
+    }
+    offset += length;
+  }
+  return 'invalid';
+}
+
 test('record and verify the real sample walkthrough', async ({page, browser}) => {
   let started = 0;
+  const capturedFrameSizes = new Set<string>();
   const cues: {start: number; text: string}[] = [];
   const external: string[] = [], errors: string[] = [];
   const cue = (text: string) => cues.push({start: (performance.now() - started) / 1000, text});
@@ -26,7 +47,7 @@ test('record and verify the real sample walkthrough', async ({page, browser}) =>
   await page.goto('/');
   await expect(page.locator('#demo-button')).toBeInViewport();
   // Start recording explicitly after page setup, then start the caption clock at the same boundary.
-  await page.screencast.start({path: 'dist/deckdelta-demo.webm', size: {width: 1440, height: 1000}});
+  await page.screencast.start({path: 'dist/deckdelta-demo.webm', size: {width: 1440, height: 1000}, onFrame: ({data}) => { capturedFrameSizes.add(jpegFrameSize(data)); }});
   started = performance.now();
   cue('One click loads the original fictional sample decks.');
   // These waits are reading time in an unsped-up recording, not synchronization.
@@ -78,6 +99,7 @@ test('record and verify the real sample walkthrough', async ({page, browser}) =>
   // Save native Playwright video, without trimming, retiming, overlays, or a movie pipeline.
   const observedSeconds = (performance.now() - started) / 1000;
   await page.screencast.stop();
+  expect([...capturedFrameSizes]).toEqual(['1440x1000']);
   await writeFile('dist/deckdelta-demo.vtt', captions(observedSeconds));
 
   // Read the actual saved media in Chromium. A timing or playback failure blocks publication.
@@ -100,6 +122,7 @@ test('record and verify the real sample walkthrough', async ({page, browser}) =>
       viewport: {width: 1440, height: 1000},
       source: 'Real Chromium recording of the included fictional Aster Studio PDFs',
       playbackSpeed: 1,
+      capturedFrameSizes: [...capturedFrameSizes],
       verified: {chartPair: '4 → 2', chartMoved: true, chartChanged: true, chartTextUnchanged: true, renderedDifference, pricePair: '3 → 3', priceRemoved: '$39', priceAdded: '$49', uncertainDuplicates: 2, manualPairingControlsShown: true, externalRequests: external, pageErrors: errors},
       captions: cues,
     }, null, 2) + '\n');
