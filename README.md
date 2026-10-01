@@ -10,11 +10,13 @@ A local-first PDF deck reviewer that follows slides when they move.
 
 </div>
 
+![DeckDelta reviewing a real sample price change from $39 to $49](https://mozzie49.github.io/deckdelta/deckdelta-preview.png)
+
 ## Why another PDF diff?
 
 A page-by-page comparison gets noisy when slide 2 becomes slide 20. DeckDelta builds a **global, one-to-one slide map**, including equal-length decks, then separates a position change from a content change. Ambiguous matches stay visible and can be corrected by hand.
 
-**Alpha release candidate:** [CI passed](https://github.com/mozzie49/deckdelta/actions/runs/36819320857) with 28 unit tests, strict typechecking, a production build, and 2 real-PDF Chromium end-to-end tests. The live demo is deployed; independent live-site QA is still in progress. This is a review aid, not a guarantee that every change is detected.
+**Alpha release candidate:** [CI passed](https://github.com/mozzie49/deckdelta/actions/runs/36819320857) with 28 unit tests, strict typechecking, a production build, and 2 real-PDF Chromium end-to-end tests. Independent live-site QA exercised eight synthetic PDF pairs: seven supported cases produced the expected mappings and seeded-change flags; the wholly image-only deck was explicitly rejected. Cancellation, replacement during processing, review-state invalidation, and language switching were also checked. Export download and content checks passed in CI; reopening a downloaded report was not verified in live-site QA. This is a review aid, not a guarantee that every change is detected.
 
 ## What you get
 
