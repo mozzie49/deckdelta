@@ -11,7 +11,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4173',
     viewport: {width: 1440, height: 1000},
-    trace: 'retain-on-failure',
+    // Trace screenshots share Chromium's screencast and can cap frames at 800px.
+    trace: {mode: 'retain-on-failure', screenshots: false, snapshots: true, sources: true},
     screenshot: 'only-on-failure',
   },
   projects: [{name: 'chromium', use: {browserName: devices['Desktop Chrome'].defaultBrowserType}}],
