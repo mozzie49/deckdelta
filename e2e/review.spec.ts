@@ -22,6 +22,23 @@ test('real PDF sample, review states, corrections, private portable export',asyn
  await page.evaluate(()=>window.scrollTo(0,0));
  // A real, verified product screenshot. Pages publishes dist after this test succeeds.
  await page.screenshot({path:'dist/deckdelta-preview.png',fullPage:false,animations:'disabled'});
+ // Selecting a deep slide and rerendering the inspector must not jump the slide map.
+ await page.locator('.map-list').evaluate(element=>{element.scrollTop=element.scrollHeight;});
+ const deepScroll=await page.locator('.map-list').evaluate(element=>element.scrollTop);
+ expect(deepScroll).toBeGreaterThan(0);
+ await page.locator('[data-row="before-10"]').click();
+ await expect(page.locator('.map-row.active')).toHaveAttribute('data-row','before-10');
+ expect(await page.locator('.map-list').evaluate(element=>element.scrollTop)).toBeGreaterThan(0);
+ expect(await page.locator('.map-row.active').evaluate(element=>{const row=element.getBoundingClientRect();const map=element.parentElement!.getBoundingClientRect();return row.top>=map.top&&row.bottom<=map.bottom;})).toBe(true);
+ await page.locator('[data-view="overlay"]').click();
+ expect(await page.locator('.map-list').evaluate(element=>element.scrollTop)).toBeGreaterThan(0);
+ // A new filter should start at its beginning rather than retain the old deck-map offset.
+ await page.locator('[data-filter="uncertain"]').click();
+ expect(await page.locator('.map-list').evaluate(element=>element.scrollTop)).toBe(0);
+ await page.locator('[data-filter="all"]').click();
+ expect(await page.locator('.map-list').evaluate(element=>element.scrollTop)).toBe(0);
+ await page.locator('[data-row="before-3"]').click();
+
  await page.locator('[data-view="overlay"]').click();await expect(page.locator('#opacity-range')).toBeVisible();await page.locator('#opacity-range').fill('70');await expect(page.locator('#overlay-image')).toHaveCSS('opacity','0.7');
  await page.locator('[data-view="side"]').click();await page.locator('[data-preview="before"]').click();await expect(page.locator('dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('dialog')).toHaveCount(0);
  await page.locator('#review-notes').fill('Check revised price <script>alert(1)</script>');await page.locator('#reviewed-button').click();
@@ -33,6 +50,10 @@ test('real PDF sample, review states, corrections, private portable export',asyn
  expect(external).toEqual([]);expect(errors).toEqual([]);
  await page.locator('#language-button').click();await expect(page.locator('#export-button')).toContainText('导出审阅');
  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.locator('.map-list').evaluate(element=>{element.scrollLeft=element.scrollWidth;});
+ await page.locator('[data-row="before-10"]').click();
+ expect(await page.locator('.map-list').evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);
+
 });
 
 test('cancel, replace, repeat, and reject invalid or oversized PDFs',async({page})=>{
