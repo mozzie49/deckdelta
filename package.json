@@ -1,0 +1,32 @@
+{
+  "name": "deckdelta",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first PDF deck change reviews, with a global slide map and portable review reports.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "samples": "node scripts/generate-samples.mjs",
+    "check": "npm test && npm run build",
+    "test:e2e": "npm run build && playwright test"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^6.3.289"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "pdf-lib": "^1.17.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
