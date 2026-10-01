@@ -4,6 +4,7 @@ import {PDFDocument,StandardFonts} from 'pdf-lib';
 
 test('real PDF sample, review states, corrections, private portable export',async({page})=>{
  const external:string[]=[];const errors:string[]=[];
+ await page.setViewportSize({width:1440,height:1000});
  page.on('request',request=>{if(!request.url().startsWith('http://127.0.0.1:4173/')&&!request.url().startsWith('blob:')&&!request.url().startsWith('data:'))external.push(request.url());});
  page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/');await page.locator('#demo-button').click();
@@ -15,6 +16,12 @@ test('real PDF sample, review states, corrections, private portable export',asyn
  await expect(page.locator('[data-filter="uncertain"] b')).toHaveText('02');
  await page.locator('[data-row="before-3"]').click();
  await expect(page.locator('.number-analysis')).toContainText('$39');await expect(page.locator('.number-analysis')).toContainText('$49');
+ await expect(page.locator('.map-row.active')).toHaveAttribute('data-row','before-3');
+ await expect(page.locator('.slide-map')).toBeVisible();
+ await page.locator('.viewer img').evaluateAll(images=>Promise.all(images.map(image=>(image as HTMLImageElement).decode())));
+ await page.evaluate(()=>window.scrollTo(0,0));
+ // A real, verified product screenshot. Pages publishes dist after this test succeeds.
+ await page.screenshot({path:'dist/deckdelta-preview.png',fullPage:false,animations:'disabled'});
  await page.locator('[data-view="overlay"]').click();await expect(page.locator('#opacity-range')).toBeVisible();await page.locator('#opacity-range').fill('70');await expect(page.locator('#overlay-image')).toHaveCSS('opacity','0.7');
  await page.locator('[data-view="side"]').click();await page.locator('[data-preview="before"]').click();await expect(page.locator('dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('dialog')).toHaveCount(0);
  await page.locator('#review-notes').fill('Check revised price <script>alert(1)</script>');await page.locator('#reviewed-button').click();
