@@ -6,7 +6,7 @@
 
 A local-first PDF deck reviewer that follows slides when they move.
 
-English · [简体中文](#简体中文)
+**[Open the live demo](https://mozzie49.github.io/deckdelta/)** · [简体中文](#简体中文)
 
 </div>
 
@@ -14,7 +14,7 @@ English · [简体中文](#简体中文)
 
 A page-by-page comparison gets noisy when slide 2 becomes slide 20. DeckDelta builds a **global, one-to-one slide map**, including equal-length decks, then separates a position change from a content change. Ambiguous matches stay visible and can be corrected by hand.
 
-**Alpha release candidate:** unit tests and production build pass. Browser smoke verification is pending the first CI run. This is a review aid, not a guarantee that every change is detected.
+**Alpha release candidate:** [CI passed](https://github.com/mozzie49/deckdelta/actions/runs/36819320857) with 28 unit tests, strict typechecking, a production build, and 2 real-PDF Chromium end-to-end tests. The live demo is deployed; independent live-site QA is still in progress. This is a review aid, not a guarantee that every change is detected.
 
 ## What you get
 
