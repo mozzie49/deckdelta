@@ -67,3 +67,5 @@ async function runComparison(demo:boolean){abortCurrent();clearReport();controll
  }catch(err){if(id!==generation)return;busy=false;controller=undefined;clearReport();error=err instanceof Error?err.message:String(err);if(language==='zh'&&err instanceof DeckError){const localized:Record<string,string>={size:'此 PDF 超过 25 MB 限制。请导出较小的文件。',empty:'文件为空，请选择 PDF 文稿。',type:'请选择 PDF 文件。',invalid:'文件不是有效的 PDF。',pages:'此 PDF 超过 50 页限制。请拆分文稿后重试。',dimensions:'PDF 页面尺寸不受支持。',text:'页面文字过多，超出本工具的处理范围。',canvas:'浏览器无法创建画布，请尝试最新桌面浏览器。',scan:'未找到可提取的文字。纯扫描或图片文稿不受支持，请使用原生 PDF 导出。',password:'不支持加密 PDF，请使用已解锁的副本。',parse:'无法完整读取 PDF。文件可能损坏或包含不受支持的内容，请重新导出。'};error=localized[err.code]||error;}render();}}
 window.addEventListener('beforeunload',event=>{if(Object.values(notes).some(Boolean)){event.preventDefault();event.returnValue='';}});
 render();
+// Shared sample links reuse the normal cancellable flow, once per page load.
+if(new URLSearchParams(window.location.search).get('sample')==='1')void runComparison(true);

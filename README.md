@@ -6,9 +6,9 @@
 
 Compare PDF decks in your browser with a global slide map, separate move/edit flags, and honest uncertainty.
 
-**[Try the sample decks →](https://mozzie49.github.io/deckdelta/)** · [Watch the browser walkthrough](https://mozzie49.github.io/deckdelta/demo.html) · [简体中文](#简体中文)
+**[Try the sample decks →](https://mozzie49.github.io/deckdelta/?sample=1)** · [Watch the browser walkthrough](https://mozzie49.github.io/deckdelta/demo.html) · [简体中文](#简体中文)
 
-No account. No document upload. Open the app, then click **Try the sample decks**.
+No account. No document upload. The sample link opens a comparison of the included fictional PDFs directly.
 
 </div>
 

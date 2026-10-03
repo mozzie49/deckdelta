@@ -130,7 +130,7 @@ test('record and verify the real sample walkthrough', async ({page, browser}) =>
     await playback.reload();
     await expect.poll(() => playback.locator('track').evaluate((track: HTMLTrackElement) => track.readyState)).toBe(2);
     await expect.poll(() => playback.locator('track').evaluate((track: HTMLTrackElement) => track.track.cues?.length)).toBe(cues.length);
-    await expect(playback.getByRole('link', {name: 'Try the sample decks →'})).toHaveAttribute('href', './');
+    await expect(playback.getByRole('link', {name: 'Try the sample decks →'})).toHaveAttribute('href', './?sample=1');
     await playback.setViewportSize({width: 390, height: 844});
     expect(await playback.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     console.log(`Verified native browser walkthrough: ${duration.toFixed(2)}s`);
